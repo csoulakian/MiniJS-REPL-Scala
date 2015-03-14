@@ -3,6 +3,7 @@ package edu.luc.cs.laufer.cs473.expressions.ast
 /** An initial algebra of arithmetic expressions.
  */
 sealed trait Expr
+case class Variable(value:String) extends Expr
 case class Constant(value: Int) extends Expr
 case class UMinus(expr: Expr) extends Expr
 case class Plus(left: Expr, right: Expr) extends Expr

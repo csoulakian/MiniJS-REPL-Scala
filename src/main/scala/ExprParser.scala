@@ -26,9 +26,12 @@ class ExprParser(val input: ParserInput) extends Parser {
   }
 
   /** factor ::= number | "+" factor | "-" factor | "(" expr ")" */
-  def Factor: Rule1[Expr] = rule { Number | UnaryPlus | UnaryMinus | Parens }
+  def Factor: Rule1[Expr] = rule { Number | UnaryPlus | UnaryMinus | Parens | ident }
 
   // explicitly handle trailing whitespace
+
+  def ident = rule { oneOrMore(CharPredicate.Alpha) ~ capture(Digits) ~ zeroOrMore(' ') ~> ((s: String) => Variable(s)) }
+
   def Number = rule { capture(Digits) ~ zeroOrMore(' ') ~> ((s: String) => Constant(s.toInt)) }
 
   def UnaryPlus = rule { '+' ~ Factor }
@@ -39,9 +42,12 @@ class ExprParser(val input: ParserInput) extends Parser {
 
   def Digits = rule { oneOrMore(CharPredicate.Digit) }
 
+  def Alphabets   = rule { oneOrMore(CharPredicate.Alpha) }
+
   /** Automatically handles whitespace after single character terminals. */
   implicit def wspChar(c: Char): Rule0 = rule { ch(c) ~ zeroOrMore(' ') }
 
   /** Automatically handles whitespace after string terminals. */
   implicit def wspStr(s: String): Rule0 = rule { str(s) ~ zeroOrMore(' ') }
+
 }
