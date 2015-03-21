@@ -24,10 +24,13 @@ class ExprParser(val input: ParserInput) extends Parser {
     )
   }
 
-  /** factor ::= number | "+" factor | "-" factor | "(" expression ")" */
-  def Factor: Rule1[Expr] = rule { Number | UnaryPlus | UnaryMinus | Parens }
+  /** factor ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
+  def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
 
   // explicitly handle trailing whitespace
+
+  def ident = rule { capture(Alphabet) ~ (zeroOrMore(CharPredicate.Alpha) |
+    zeroOrMore(CharPredicate.Digit)) ~ WhiteSpace ~> ((s: String) => Variable(s.trim)) }
 
   def Number = rule { capture(Digits) ~ WhiteSpace ~> ((s: String) => Constant(s.toInt)) }
 
@@ -38,6 +41,8 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Parens = rule { ws('(') ~ Expression ~ ws(')') }
 
   def Digits = rule { oneOrMore(CharPredicate.Digit) }
+
+  def Alphabet = rule { oneOrMore(CharPredicate.Alpha)}
 
   val WhiteSpaceChar = CharPredicate(" \n\r\t\f")
 

@@ -15,6 +15,7 @@ object behaviors {
   }
 
   def size(e: Expr): Int = e match {
+    case Variable(v) => 1
     case Constant(c) => 1
     case UMinus(r)   => 1 + size(r)
     case Plus(l, r)  => 1 + size(l) + size(r)
@@ -25,6 +26,7 @@ object behaviors {
   }
 
   def depth(e: Expr): Int = e match {
+    case Variable(v) => 1
     case Constant(c) => 1
     case UMinus(r)   => 1 + depth(r)
     case Plus(l, r)  => 1 + math.max(depth(l), depth(r))
@@ -35,6 +37,7 @@ object behaviors {
   }
 
   def toFormattedString(prefix: String)(e: Expr): String = e match {
+    case Variable(v) => prefix + v
     case Constant(c) => prefix + c.toString
     case UMinus(r)   => buildUnaryExprString(prefix, "UMinus", toFormattedString(prefix + INDENT)(r))
     case Plus(l, r)  => buildExprString(prefix, "Plus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
