@@ -69,6 +69,6 @@ object behaviors {
     result.toString
   }
 
-  val EOL = System.getProperty("line.separator")
+  val EOL = scala.util.Properties.lineSeparator
   val INDENT = ".."
 }
