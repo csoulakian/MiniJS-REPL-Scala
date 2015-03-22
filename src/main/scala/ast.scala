@@ -5,6 +5,7 @@ package edu.luc.cs.laufer.cs473.expressions.ast
 sealed trait Expr
 case class Variable(str: String) extends Expr
 case class Constant(value: Int) extends Expr
+case class Equals(v: Variable, value: Expr) extends Expr
 case class UMinus(expr: Expr) extends Expr
 case class Plus(left: Expr, right: Expr) extends Expr
 case class Minus(left: Expr, right: Expr) extends Expr

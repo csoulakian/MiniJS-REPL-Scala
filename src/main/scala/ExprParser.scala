@@ -25,12 +25,14 @@ class ExprParser(val input: ParserInput) extends Parser {
   }
 
   /** factor ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
-  def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
+  def Factor: Rule1[Expr] = rule { Number | UnaryPlus | UnaryMinus | Parens | ident }
+
+  /** assignment  ::= ident "=" expression ";" */
+  def Assignment = rule { ident ~ ws('=') ~ Expression ~ WhiteSpace ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
 
   // explicitly handle trailing whitespace
 
-  def ident = rule { capture(Alphabet) ~ (zeroOrMore(CharPredicate.Alpha) |
-    zeroOrMore(CharPredicate.Digit)) ~ WhiteSpace ~> ((s: String) => Variable(s.trim)) }
+  def ident = rule { capture(Alphabet) ~ WhiteSpace ~> ((s: String) => Variable(s.trim)) }
 
   def Number = rule { capture(Digits) ~ WhiteSpace ~> ((s: String) => Constant(s.toInt)) }
 
@@ -38,11 +40,13 @@ class ExprParser(val input: ParserInput) extends Parser {
 
   def UnaryMinus = rule { ws('-') ~ Factor ~> (UMinus(_: Expr)) }
 
+  //def UEquals = rule { ident ~ ws('=') ~ Expression ~ ws(';') }
+
   def Parens = rule { ws('(') ~ Expression ~ ws(')') }
 
   def Digits = rule { oneOrMore(CharPredicate.Digit) }
 
-  def Alphabet = rule { oneOrMore(CharPredicate.Alpha)}
+  def Alphabet = rule { oneOrMore(CharPredicate.Alpha) ~ zeroOrMore(CharPredicate.AlphaNum) }
 
   val WhiteSpaceChar = CharPredicate(" \n\r\t\f")
 

@@ -37,8 +37,9 @@ object behaviors {
   }
 
   def toFormattedString(prefix: String)(e: Expr): String = e match {
-    case Variable(v) => prefix + v
+    case Variable(v) => prefix + v.toString
     case Constant(c) => prefix + c.toString
+    case Equals(v,c) => buildExprString(prefix, "Equals", toFormattedString(prefix + INDENT)(v), toFormattedString(prefix + INDENT)(c))
     case UMinus(r)   => buildUnaryExprString(prefix, "UMinus", toFormattedString(prefix + INDENT)(r))
     case Plus(l, r)  => buildExprString(prefix, "Plus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
     case Minus(l, r) => buildExprString(prefix, "Minus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
