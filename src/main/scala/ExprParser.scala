@@ -8,17 +8,30 @@ class ExprParser(val input: ParserInput) extends Parser {
   def InputLine = rule { WhiteSpace ~ Statement ~ EOI }
 
   // statement  ::= expression ";" | assignment | conditional | loop | block
-  def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Blo }
+  def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Lo | Blo }
 
 
   /** assignment  ::= ident "=" expression ";" */
   def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
 
-  // loop   ::= "while" "(" expression ")" block
+  // conditional ::= "if" "(" expression ")" block [ "else" block ]
+/*  def Condx = rule { "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~ zeroOrMore(
+    "else" ~ WhiteSpace ~ Blo) ~> (Conditional(_: Expr, _: Block)) }*/
 
+/*  def Cond = rule {
+    "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ (
+      Blo ~> (Conditional(_: Expr, _: Block))
+      )
+      )
+  }*/
+
+  // | (Blo ~ "else" ~ WhiteSpace ~ Blo) ~> (Conditional(_: Expr, _: Block, _: Block)
+
+  // loop   ::= "while" "(" expression ")" block
+  def Lo = rule { "while" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Loop(_: Expr, _: Block))}
 
   // block       ::= "{" statement* "}"
-  def Blo = rule { ws('{') ~ Statement ~ ws('}') ~> (Block(_: Expr))}
+  def Blo = rule { ws('{') ~ oneOrMore(Statement) ~ ws('}') ~> (Block(_: _*))}
 
 
   /** expression ::= term { { "+" | "-" } term }* */
