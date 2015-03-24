@@ -40,6 +40,7 @@ object behaviors {
     case Variable(v) => prefix + v.toString
     case Constant(c) => prefix + c.toString
     case Equals(v,c) => buildExprString(prefix, "Equals", toFormattedString(prefix + INDENT)(v), toFormattedString(prefix + INDENT)(c))
+    case Block(r)    => buildBlockExprString(prefix, toFormattedString(prefix + INDENT)(r))
     case UMinus(r)   => buildUnaryExprString(prefix, "UMinus", toFormattedString(prefix + INDENT)(r))
     case Plus(l, r)  => buildExprString(prefix, "Plus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
     case Minus(l, r) => buildExprString(prefix, "Minus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
@@ -70,6 +71,16 @@ object behaviors {
     result.append(EOL)
     result.append(exprString)
     result.append(")")
+    result.toString
+  }
+
+  def buildBlockExprString(prefix: String, exprString: String) = {
+    val result = new StringBuilder(prefix)
+    result.append("{")
+    result.append(EOL)
+    result.append(exprString)
+    result.append(EOL)
+    result.append("}")
     result.toString
   }
 

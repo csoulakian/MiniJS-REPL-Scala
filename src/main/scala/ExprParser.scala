@@ -5,7 +5,21 @@ import ast._
 
 class ExprParser(val input: ParserInput) extends Parser {
 
-  def InputLine = rule { WhiteSpace ~ Expression ~ EOI }
+  def InputLine = rule { WhiteSpace ~ Statement ~ EOI }
+
+  // statement  ::= expression ";" | assignment | conditional | loop | block
+  def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Blo }
+
+
+  /** assignment  ::= ident "=" expression ";" */
+  def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
+
+  // loop   ::= "while" "(" expression ")" block
+
+
+  // block       ::= "{" statement* "}"
+  def Blo = rule { ws('{') ~ Statement ~ ws('}') ~> (Block(_: Expr))}
+
 
   /** expression ::= term { { "+" | "-" } term }* */
   def Expression = rule {
@@ -25,10 +39,8 @@ class ExprParser(val input: ParserInput) extends Parser {
   }
 
   /** factor ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
-  def Factor: Rule1[Expr] = rule { Number | UnaryPlus | UnaryMinus | Parens | ident }
+  def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
 
-  /** assignment  ::= ident "=" expression ";" */
-  def Assignment = rule { ident ~ ws('=') ~ Expression ~ WhiteSpace ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
 
   // explicitly handle trailing whitespace
 
