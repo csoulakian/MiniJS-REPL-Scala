@@ -1,5 +1,6 @@
 package edu.luc.cs.laufer.cs473.expressions
 
+import org.parboiled2.RuleFrame.ZeroOrMore
 import org.parboiled2._
 import ast._
 
@@ -8,12 +9,12 @@ class ExprParser(val input: ParserInput) extends Parser {
   def InputLine = rule { WhiteSpace ~ Statement ~ EOI }
 
   // statement  ::= expression ";" | assignment | conditional | loop | block
-  def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Lo | Blo }
+  def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Lo | Blo | con }
 
 
   /** assignment  ::= ident "=" expression ";" */
   def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
-
+ def con=rule { "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Conditional(_: Expr, _: Block,Block(Seq())))}
   // conditional ::= "if" "(" expression ")" block [ "else" block ]
 /*  def Condx = rule { "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~ zeroOrMore(
     "else" ~ WhiteSpace ~ Blo) ~> (Conditional(_: Expr, _: Block)) }*/
@@ -31,7 +32,7 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Lo = rule { "while" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Loop(_: Expr, _: Block))}
 
   // block       ::= "{" statement* "}"
-  def Blo = rule { ws('{') ~ oneOrMore(Statement) ~ ws('}') ~> (Block(_: _*))}
+  def Blo = rule { ws('{') ~ zeroOrMore( Statement) ~ ws('}') ~> (Block(_))}
 
 
   /** expression ::= term { { "+" | "-" } term }* */
