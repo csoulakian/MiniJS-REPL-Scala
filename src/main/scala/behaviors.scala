@@ -39,9 +39,9 @@ object behaviors {
   def toFormattedString(prefix: String)(e: Expr): String = e match {
     case Variable(v) => prefix + v.toString
     case Constant(c) => prefix + c.toString
-    case Equals(v,c) => buildExprString(prefix, "Equals", toFormattedString(prefix + INDENT)(v), toFormattedString(prefix + INDENT)(c))
+    case Equals(v, c) => buildExprString(prefix, "Equals", toFormattedString(prefix + INDENT)(v), toFormattedString(prefix + INDENT)(c))
+    case Conditional(r, b, eb)  => buildExprString(prefix, "If", toFormattedString(prefix + INDENT)(r), toFormattedString(prefix + INDENT)(b))
     case Loop(r, b)  => buildExprString(prefix, "Loop", toFormattedString(prefix + INDENT)(r), toFormattedString(prefix + INDENT)(b))
-    case Conditional(r, b,eb)  => buildExprString(prefix, "If", toFormattedString(prefix + INDENT)(r), toFormattedString(prefix + INDENT)(b))
     case Block(r)    => buildBlockExprString(prefix, "Block", toFormattedStrings(prefix + INDENT)(r))
     case UMinus(r)   => buildUnaryExprString(prefix, "UMinus",toFormattedString(prefix + INDENT)(r))
     case Plus(l, r)  => buildExprString(prefix, "Plus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
@@ -50,16 +50,18 @@ object behaviors {
     case Div(l, r)   => buildExprString(prefix, "Div", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
     case Mod(l, r)   => buildExprString(prefix, "Mod", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
   }
+
   def toFormattedStrings(prefix: String)(e: Seq[Expr]):String=  {
     val result = new StringBuilder(prefix)
 
-  for(exp <- e)
-  {
-    result.append(    toFormattedString(prefix)(exp));
-    result.append(EOL)
+    for(exp <- e) {
+      result.append(toFormattedString(prefix)(exp))
+      result.append(EOL)
+    }
+
+    result.toString()
   }
-  result.toString();
-  }
+
   def toFormattedString(e: Expr): String = toFormattedString("")(e)
 
   def buildExprString(prefix: String, nodeString: String, leftString: String, rightString: String) = {
