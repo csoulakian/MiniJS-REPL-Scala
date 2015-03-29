@@ -14,11 +14,15 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
 
   /**   conditional   ::= "if" "(" expression ")" block [ "else" block ]
-    * if there is no else, then Conditional.elseBlock = Block(List())
-    * (a block of an empty list) */
+    *
+    * if there is no else, then Conditional.elseBlock = Block(List()) (a block of an empty list).
+    * The "or" operator takes 1st option as precedence - if the word "else" is not found when parsing
+    * the input, then it will take the 2nd option of just a block at the end.
+    * Ignore false errors on the or operator and ~>
+    * */
   def Cond = rule {
     "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ (
-      Blo ~ WhiteSpace ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block))
+      Blo ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block))
         | Blo ~> (Conditional(_: Expr, _: Block, Block(Seq())))
     )
   }
