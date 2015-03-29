@@ -63,6 +63,7 @@ object behaviors {
   }
 
   def toFormattedString(e: Expr): String = toFormattedString("")(e)
+  def toFormattedString(e: Seq[Expr]): String = toFormattedStrings("")(e)
 
   def buildExprString(prefix: String, nodeString: String, leftString: String, rightString: String) = {
     val result = new StringBuilder(prefix)

@@ -5,25 +5,32 @@ import ast._
 
 class ExprParser(val input: ParserInput) extends Parser {
 
-  def InputLine = rule { WhiteSpace ~ Statement ~ EOI }
+  def InputLine = rule { WhiteSpace ~ zeroOrMore(Statement) ~ EOI }
 
-  // statement  ::= expression ";" | assignment | conditional | loop | block
+  /**   statement   ::= expression ";" | assignment | conditional | loop | block  */
   def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Cond | Lo | Blo }
 
-  /** assignment  ::= ident "=" expression ";" */
+  /**   assignment    ::= ident "=" expression ";"  */
   def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
 
-  // conditional ::= "if" "(" expression ")" block [ "else" block ]
-  def Cond = rule { "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Conditional(_: Expr, _: Block,Block(Seq())))}
+  /**   conditional   ::= "if" "(" expression ")" block [ "else" block ]
+    * if there is no else, then Conditional.elseBlock = Block(List())
+    * (a block of an empty list) */
+  def Cond = rule {
+    "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ (
+      Blo ~ WhiteSpace ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block))
+        | Blo ~> (Conditional(_: Expr, _: Block, Block(Seq())))
+    )
+  }
 
-  // loop ::= "while" "(" expression ")" block
+  /**   loop    ::= "while" "(" expression ")" block  */
   def Lo = rule { "while" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Loop(_: Expr, _: Block))}
 
-  // block  ::= "{" statement* "}"
-  def Blo = rule { ws('{') ~ zeroOrMore( Statement) ~ ws('}') ~> (Block(_))}
+  /**   block   ::= "{" statement* "}"  */
+  def Blo = rule { ws('{') ~ zeroOrMore(Statement) ~ ws('}') ~> (Block(_))}
 
 
-  /** expression ::= term { { "+" | "-" } term }* */
+  /**   expression  ::= term { { "+" | "-" } term }*  */
   def Expression = rule {
     Term ~ zeroOrMore(
       ws('+') ~ Term ~> (Plus(_: Expr, _))
@@ -31,7 +38,7 @@ class ExprParser(val input: ParserInput) extends Parser {
     )
   }
 
-  /** term ::= factor { { "*" | "/" | "%" } factor }* */
+  /**   term    ::= factor { { "*" | "/" | "%" } factor }*  */
   def Term = rule {
     Factor ~ zeroOrMore(
       ws('*') ~ Factor ~> (Times(_: Expr, _))
@@ -40,7 +47,7 @@ class ExprParser(val input: ParserInput) extends Parser {
     )
   }
 
-  /** factor ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
+  /**   factor    ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
   def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
 
   // explicitly handle trailing whitespace
