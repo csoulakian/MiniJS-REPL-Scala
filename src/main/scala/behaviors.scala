@@ -12,6 +12,11 @@ object behaviors {
     case Times(l, r) => evaluate(l) * evaluate(r)
     case Div(l, r)   => evaluate(l) / evaluate(r)
     case Mod(l, r)   => evaluate(l) % evaluate(r)
+    case Variable(v) => ???
+    case Equals(v, c) => ???
+    case Conditional(r, b, eb) => ???
+    case Loop(r, b) => ???
+    case Block(r) => ???
   }
 
   def size(e: Expr): Int = e match {
@@ -23,6 +28,10 @@ object behaviors {
     case Times(l, r) => 1 + size(l) + size(r)
     case Div(l, r)   => 1 + size(l) + size(r)
     case Mod(l, r)   => 1 + size(l) + size(r)
+    case Equals(v, c) => ???
+    case Conditional(r, b, eb) => ???
+    case Loop(r, b) => ???
+    case Block(r) => ???
   }
 
   def depth(e: Expr): Int = e match {
@@ -34,21 +43,26 @@ object behaviors {
     case Times(l, r) => 1 + math.max(depth(l), depth(r))
     case Div(l, r)   => 1 + math.max(depth(l), depth(r))
     case Mod(l, r)   => 1 + math.max(depth(l), depth(r))
+    case Equals(v, c) => ???
+    case Conditional(r, b, eb) => ???
+    case Loop(r, b) => ???
+    case Block(r) => ???
   }
 
   def toFormattedString(prefix: String)(e: Expr): String = e match {
     case Variable(v) => prefix + v.toString
     case Constant(c) => prefix + c.toString
-    case Equals(v, c) => buildExprString(prefix, "Equals", toFormattedString(prefix + INDENT)(v), toFormattedString(prefix + INDENT)(c))
-    case Conditional(r, b, eb)  => buildExprString(prefix, "If", toFormattedString(prefix + INDENT)(r), toFormattedString(prefix + INDENT)(b))
-    case Loop(r, b)  => buildExprString(prefix, "Loop", toFormattedString(prefix + INDENT)(r), toFormattedString(prefix + INDENT)(b))
-    case Block(r)    => buildBlockExprString(prefix, "Block", toFormattedStrings(prefix + INDENT)(r))
-    case UMinus(r)   => buildUnaryExprString(prefix, "UMinus",toFormattedString(prefix + INDENT)(r))
-    case Plus(l, r)  => buildExprString(prefix, "Plus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
-    case Minus(l, r) => buildExprString(prefix, "Minus", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
-    case Times(l, r) => buildExprString(prefix, "Times", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
-    case Div(l, r)   => buildExprString(prefix, "Div", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
-    case Mod(l, r)   => buildExprString(prefix, "Mod", toFormattedString(prefix + INDENT)(l), toFormattedString(prefix + INDENT)(r))
+    case Equals(v, c) => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
+    case Conditional(i, b, eb)  => buildCondExprString(prefix, toFormattedString(prefix + INDENT)(i),
+      toFormattedString(prefix + INDENT)(b), toFormattedString(prefix + INDENT)(eb))
+    case Loop(exp, b)  => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
+    case Block(exp)    => buildBlockExprString(prefix, toFormattedStrings(prefix + INDENT)(exp))
+    case UMinus(exp)   => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
+    case Plus(l, r)  => buildExprString(prefix, " + ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Minus(l, r) => buildExprString(prefix, " - ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Times(l, r) => buildExprString(prefix, " * ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Div(l, r)   => buildExprString(prefix, " / ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Mod(l, r)   => buildExprString(prefix, "%", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
   }
 
   def toFormattedStrings(prefix: String)(e: Seq[Expr]):String=  {
@@ -58,44 +72,62 @@ object behaviors {
       result.append(toFormattedString(prefix)(exp))
       result.append(EOL)
     }
-
     result.toString()
   }
 
   def toFormattedString(e: Expr): String = toFormattedString("")(e)
   def toFormattedString(e: Seq[Expr]): String = toFormattedStrings("")(e)
 
-  def buildExprString(prefix: String, nodeString: String, leftString: String, rightString: String) = {
+  def buildExprString(prefix: String, opString: String, leftString: String, rightString: String) = {
     val result = new StringBuilder(prefix)
-    result.append(nodeString)
     result.append("(")
-    result.append(EOL)
     result.append(leftString)
-    result.append(", ")
-    result.append(EOL)
+    result.append(opString)
     result.append(rightString)
     result.append(")")
-    result.toString
+    result.toString()
   }
 
-  def buildUnaryExprString(prefix: String, nodeString: String, exprString: String) = {
+  def buildUnaryExprString(prefix: String, exprString: String) = {
     val result = new StringBuilder(prefix)
-    result.append(nodeString)
-    result.append("(")
-    result.append(EOL)
+    result.append("(-")
     result.append(exprString)
     result.append(")")
-    result.toString
+    result.toString()
   }
 
-  def buildBlockExprString(prefix: String, nodeString: String, exprString: String) = {
+  def buildBlockExprString(prefix: String, exprString: String) = {
     val result = new StringBuilder(prefix)
     result.append("{")
     result.append(EOL)
-    result.append(exprString)
+    result.append(INDENT + exprString)
     result.append(EOL)
     result.append("}")
-    result.toString
+    result.toString()
+  }
+
+  def buildLoopExprString(prefix: String, exprString: String, blockString: String) = {
+    val result = new StringBuilder(prefix)
+    result.append("while (")
+    result.append(exprString)
+    result.append(") ")
+    result.append(INDENT + blockString)
+    result.append(EOL)
+    result.toString()
+  }
+
+  def buildCondExprString(prefix: String, ifString: String, blockString: String, elseBlock: String) = {
+    val result = new StringBuilder(prefix)
+    result.append("if (")
+    result.append(ifString)
+    result.append(") ")
+    result.append(blockString)
+    if(!elseBlock.isEmpty) {
+      result.append(" else ")
+      result.append(elseBlock)
+    }
+    result.append(EOL)
+    result.toString()
   }
 
   val EOL = scala.util.Properties.lineSeparator
