@@ -22,8 +22,8 @@ class ExprParser(val input: ParserInput) extends Parser {
     * */
   def Cond = rule {
     "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ (
-      Blo ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block))
-        | Blo ~> (Conditional(_: Expr, _: Block, Block(Seq())))
+      (Blo ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block)))
+        | (Blo ~> (Conditional(_: Expr, _: Block, Block(): Block)))
     )
   }
 
@@ -31,7 +31,7 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Lo = rule { "while" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ Blo ~> (Loop(_: Expr, _: Block))}
 
   /**   block   ::= "{" statement* "}"  */
-  def Blo = rule { ws('{') ~ zeroOrMore(Statement) ~ ws('}') ~> (Block(_))}
+  def Blo = rule { ws('{') ~ zeroOrMore(Statement) ~ ws('}') ~> (Block(_: _*))}
 
 
   /**   expression  ::= term { { "+" | "-" } term }*  */

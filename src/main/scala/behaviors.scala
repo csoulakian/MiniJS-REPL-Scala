@@ -56,7 +56,7 @@ object behaviors {
     case Conditional(i, b, eb)  => buildCondExprString(prefix, toFormattedString(prefix + INDENT)(i),
       toFormattedString(prefix + INDENT)(b), toFormattedString(prefix + INDENT)(eb))
     case Loop(exp, b)  => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
-    case Block(exp)    => buildBlockExprString(prefix, toFormattedStrings(prefix + INDENT)(exp))
+    case b: Block => buildBlockExprString(prefix, toFormattedStrings(prefix)(b.expr))
     case UMinus(exp)   => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
     case Plus(l, r)  => buildExprString(prefix, " + ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
     case Minus(l, r) => buildExprString(prefix, " - ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
@@ -65,18 +65,20 @@ object behaviors {
     case Mod(l, r)   => buildExprString(prefix, "%", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
   }
 
-  def toFormattedStrings(prefix: String)(e: Seq[Expr]):String=  {
+  def toFormattedStrings(prefix: String)(e: Seq[_]): String = {
     val result = new StringBuilder(prefix)
-
-    for(exp <- e) {
-      result.append(toFormattedString(prefix)(exp))
-      result.append(EOL)
+    if(e.nonEmpty) {
+      for (exp <- e) {
+        result.append(toFormattedString(prefix)(exp.asInstanceOf[Expr]))
+        result.append(EOL)
+      }
     }
     result.toString()
   }
 
   def toFormattedString(e: Expr): String = toFormattedString("")(e)
   def toFormattedString(e: Seq[Expr]): String = toFormattedStrings("")(e)
+
 
   def buildExprString(prefix: String, opString: String, leftString: String, rightString: String) = {
     val result = new StringBuilder(prefix)
@@ -100,7 +102,8 @@ object behaviors {
     val result = new StringBuilder(prefix)
     result.append("{")
     result.append(EOL)
-    result.append(INDENT + exprString)
+    // adds an indent to each line in the exprString
+    result.append(exprString.lines.map(s => INDENT + s).mkString("\n"))
     result.append(EOL)
     result.append("}")
     result.toString()
