@@ -49,22 +49,11 @@ object behaviors {
     case Block(r) => ???
   }
 
-  def toFormattedString(prefix: String)(e: Expr): String = e match {
-    case Variable(v) => prefix + v.toString
-    case Constant(c) => prefix + c.toString
-    case Equals(v, c) => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
-    case Conditional(i, b, eb)  => buildCondExprString(prefix, toFormattedString(prefix + INDENT)(i),
-      toFormattedString(prefix + INDENT)(b), toFormattedString(prefix + INDENT)(eb))
-    case Loop(exp, b)  => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
-    case b: Block => buildBlockExprString(prefix, toFormattedStrings(prefix)(b.expr))
-    case UMinus(exp)   => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
-    case Plus(l, r)  => buildExprString(prefix, " + ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
-    case Minus(l, r) => buildExprString(prefix, " - ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
-    case Times(l, r) => buildExprString(prefix, " * ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
-    case Div(l, r)   => buildExprString(prefix, " / ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
-    case Mod(l, r)   => buildExprString(prefix, "%", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
-  }
+  // output of parser is always a Seq[Expr],
+  // toFormattedString in Calculator calls this method first
+  def toFormattedString(e: Seq[Expr]): String = toFormattedStrings("")(e)
 
+  // e = a sequence of zero or more Expr
   def toFormattedStrings(prefix: String)(e: Seq[_]): String = {
     val result = new StringBuilder(prefix)
     if(e.nonEmpty) {
@@ -76,17 +65,40 @@ object behaviors {
     result.toString()
   }
 
-  def toFormattedString(e: Expr): String = toFormattedString("")(e)
-  def toFormattedString(e: Seq[Expr]): String = toFormattedStrings("")(e)
+  def toFormattedString(prefix: String)(e: Expr): String = e match {
+    case Variable(v) => prefix + v.toString
+    case Constant(c) => prefix + c.toString
+    case Equals(v, c) => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
+    case Conditional(i, b, eb)  => buildCondExprString(prefix, toFormattedString(prefix)(i),
+      toFormattedString(prefix)(b), toFormattedString(prefix)(eb))
+    case Loop(exp, b)  => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
+    // block always comes in as a block of a sequence of zero or more Expr
+    case b: Block => buildBlockExprString(prefix, toFormattedStrings(prefix)(b.expr))
+    case UMinus(exp)   => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
+    case Plus(l, r)  => buildExprString(prefix, " + ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Minus(l, r) => buildExprString(prefix, " - ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Times(l, r) => buildExprString(prefix, " * ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Div(l, r)   => buildExprString(prefix, " / ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+    case Mod(l, r)   => buildExprString(prefix, "%", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
+  }
 
+  def toFormattedString(e: Expr): String = toFormattedString("")(e)
 
   def buildExprString(prefix: String, opString: String, leftString: String, rightString: String) = {
     val result = new StringBuilder(prefix)
-    result.append("(")
-    result.append(leftString)
-    result.append(opString)
-    result.append(rightString)
-    result.append(")")
+    opString match {
+      case " = " =>
+        result.append(leftString)
+        result.append(opString)
+        result.append(rightString)
+        result.append(";")
+      case _ =>
+        result.append("(")
+        result.append(leftString)
+        result.append(opString)
+        result.append(rightString)
+        result.append(")")
+    }
     result.toString()
   }
 
@@ -100,12 +112,14 @@ object behaviors {
 
   def buildBlockExprString(prefix: String, exprString: String) = {
     val result = new StringBuilder(prefix)
-    result.append("{")
-    result.append(EOL)
-    // adds an indent to each line in the exprString
-    result.append(exprString.lines.map(s => INDENT + s).mkString("\n"))
-    result.append(EOL)
-    result.append("}")
+    if(exprString.trim.length > 0) {
+      result.append("{")
+      result.append(EOL)
+      // adds an indent to each line in the exprString
+      result.append(exprString.lines.map(s => INDENT + s).mkString("\n"))
+      result.append(EOL)
+      result.append("}")
+    }
     result.toString()
   }
 
@@ -114,8 +128,7 @@ object behaviors {
     result.append("while (")
     result.append(exprString)
     result.append(") ")
-    result.append(INDENT + blockString)
-    result.append(EOL)
+    result.append(blockString)
     result.toString()
   }
 
@@ -125,7 +138,7 @@ object behaviors {
     result.append(ifString)
     result.append(") ")
     result.append(blockString)
-    if(!elseBlock.isEmpty) {
+    if(elseBlock.trim.length > 0) {
       result.append(" else ")
       result.append(elseBlock)
     }
