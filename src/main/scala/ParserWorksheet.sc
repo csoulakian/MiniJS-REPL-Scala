@@ -1,20 +1,15 @@
 import edu.luc.cs.laufer.cs473.expressions._
-
+import edu.luc.cs.laufer.cs473.expressions.ast.Expr
+import edu.luc.cs.laufer.cs473.expressions.behaviors._
 import org.parboiled2.ParseError
-import scala.util.{Success, Failure}
-val input2: String = "if(0) {2+3;} else {3+4;}"
-val input3: String = "if(0) {2+3;}"
-val input1: String = "{2+3; 4+7;}"
-
-val parser = new ExprParser(input3)
-parser.InputLine.run() match {
-  case Failure(error: ParseError) =>
-    println("This expression could not be parsed:")
-    println(parser.formatError(error))
-  case Failure(error) =>
-    println("This expression could not be evaluated: " + error)
-  case Success(expr) =>
-    import behaviors._
-    println("The parsed expression is: ")
-    println(toFormattedString(expr))
-}
+import scala.util.{Try, Success, Failure}
+val inputString1 = "x = 5;"
+val inputString2 = "x = 5 ; y = 7;"
+val inputString3 = "((1 + y2) - (3 * y4)) / 5;"
+val inputString4 = "x = ((1 + y2) - (3 * y4)) / 5;"
+val inputString5 = "if (1) { x = 2; }"
+val inputString6 = "if (1) { x = 2; } else { x = 3; }"
+val inputString7 = "{ r = r + x; y = y + 1 ; }"
+val inputString8 = "if (4) { r = r + x; y = y + 1; }"
+val inputString9 = "while (y) {r = r + x; y = y - 1;}"
+val badInput1 = "x = 5"

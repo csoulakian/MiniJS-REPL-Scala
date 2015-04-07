@@ -5,48 +5,48 @@ import ast._
 object behaviors {
 
   def evaluate(e: Expr): Int = e match {
-    case Constant(c) => c
-    case UMinus(r)   => -evaluate(r)
-    case Plus(l, r)  => evaluate(l) + evaluate(r)
-    case Minus(l, r) => evaluate(l) - evaluate(r)
-    case Times(l, r) => evaluate(l) * evaluate(r)
-    case Div(l, r)   => evaluate(l) / evaluate(r)
-    case Mod(l, r)   => evaluate(l) % evaluate(r)
-    case Variable(v) => ???
-    case Equals(v, c) => ???
+    case Constant(c)           => c
+    case UMinus(r)             => -evaluate(r)
+    case Plus(l, r)            => evaluate(l) + evaluate(r)
+    case Minus(l, r)           => evaluate(l) - evaluate(r)
+    case Times(l, r)           => evaluate(l) * evaluate(r)
+    case Div(l, r)             => evaluate(l) / evaluate(r)
+    case Mod(l, r)             => evaluate(l) % evaluate(r)
+    case Variable(v)           => ???
+    case Equals(v, c)          => ???
     case Conditional(r, b, eb) => ???
-    case Loop(r, b) => ???
-    case Block(r) => ???
+    case Loop(r, b)            => ???
+    case Block(r)              => ???
   }
 
   def size(e: Expr): Int = e match {
-    case Variable(v) => 1
-    case Constant(c) => 1
-    case UMinus(r)   => 1 + size(r)
-    case Plus(l, r)  => 1 + size(l) + size(r)
-    case Minus(l, r) => 1 + size(l) + size(r)
-    case Times(l, r) => 1 + size(l) + size(r)
-    case Div(l, r)   => 1 + size(l) + size(r)
-    case Mod(l, r)   => 1 + size(l) + size(r)
-    case Equals(v, c) => ???
+    case Variable(v)           => 1
+    case Constant(c)           => 1
+    case UMinus(r)             => 1 + size(r)
+    case Plus(l, r)            => 1 + size(l) + size(r)
+    case Minus(l, r)           => 1 + size(l) + size(r)
+    case Times(l, r)           => 1 + size(l) + size(r)
+    case Div(l, r)             => 1 + size(l) + size(r)
+    case Mod(l, r)             => 1 + size(l) + size(r)
+    case Equals(v, c)          => ???
     case Conditional(r, b, eb) => ???
-    case Loop(r, b) => ???
-    case Block(r) => ???
+    case Loop(r, b)            => ???
+    case Block(r)              => ???
   }
 
   def depth(e: Expr): Int = e match {
-    case Variable(v) => 1
-    case Constant(c) => 1
-    case UMinus(r)   => 1 + depth(r)
-    case Plus(l, r)  => 1 + math.max(depth(l), depth(r))
-    case Minus(l, r) => 1 + math.max(depth(l), depth(r))
-    case Times(l, r) => 1 + math.max(depth(l), depth(r))
-    case Div(l, r)   => 1 + math.max(depth(l), depth(r))
-    case Mod(l, r)   => 1 + math.max(depth(l), depth(r))
-    case Equals(v, c) => ???
+    case Variable(v)           => 1
+    case Constant(c)           => 1
+    case UMinus(r)             => 1 + depth(r)
+    case Plus(l, r)            => 1 + math.max(depth(l), depth(r))
+    case Minus(l, r)           => 1 + math.max(depth(l), depth(r))
+    case Times(l, r)           => 1 + math.max(depth(l), depth(r))
+    case Div(l, r)             => 1 + math.max(depth(l), depth(r))
+    case Mod(l, r)             => 1 + math.max(depth(l), depth(r))
+    case Equals(v, c)          => ???
     case Conditional(r, b, eb) => ???
-    case Loop(r, b) => ???
-    case Block(r) => ???
+    case Loop(r, b)            => ???
+    case Block(r)              => ???
   }
 
   // output of parser is always a Seq[Expr],
@@ -56,7 +56,7 @@ object behaviors {
   // e = a sequence of zero or more Expr
   def toFormattedStrings(prefix: String)(e: Seq[_]): String = {
     val result = new StringBuilder(prefix)
-    if(e.nonEmpty) {
+    if (e.nonEmpty) {
       for (exp <- e) {
         result.append(toFormattedString(prefix)(exp.asInstanceOf[Expr]))
         result.append(EOL)
@@ -66,15 +66,15 @@ object behaviors {
   }
 
   def toFormattedString(prefix: String)(e: Expr): String = e match {
-    case Variable(v) => prefix + v.toString
-    case Constant(c) => prefix + c.toString
-    case Equals(v, c) => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
-    case Conditional(i, b, eb)  => buildCondExprString(prefix, toFormattedString(prefix)(i),
+    case Variable(v)           => prefix + v.toString
+    case Constant(c)           => prefix + c.toString
+    case Equals(v, c)          => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
+    case Conditional(i, b, eb) => buildCondExprString(prefix, toFormattedString(prefix)(i),
       toFormattedString(prefix)(b), toFormattedString(prefix)(eb))
-    case Loop(exp, b)  => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
+    case Loop(exp, b)          => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
     // block always comes in as a block of a sequence of zero or more Expr
-    case b: Block => buildBlockExprString(prefix, toFormattedStrings(prefix)(b.expr))
-    case UMinus(exp)   => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
+    case b: Block    => buildBlockExprString(prefix, toFormattedStrings(prefix)(b.expr))
+    case UMinus(exp) => buildUnaryExprString(prefix, toFormattedString(prefix)(exp))
     case Plus(l, r)  => buildExprString(prefix, " + ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
     case Minus(l, r) => buildExprString(prefix, " - ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
     case Times(l, r) => buildExprString(prefix, " * ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
@@ -92,7 +92,7 @@ object behaviors {
         result.append(opString)
         result.append(rightString)
         result.append(";")
-      case _ =>
+      case _     =>
         result.append("(")
         result.append(leftString)
         result.append(opString)
@@ -112,11 +112,11 @@ object behaviors {
 
   def buildBlockExprString(prefix: String, exprString: String) = {
     val result = new StringBuilder(prefix)
-    if(exprString.trim.length > 0) {
+    if (exprString.trim.length > 0) {
       result.append("{")
       result.append(EOL)
       // adds an indent to each line in the exprString
-      result.append(exprString.lines.map(s => INDENT + s).mkString("\n"))
+      result.append(exprString.lines.map(s => INDENT + s).mkString(EOL))
       result.append(EOL)
       result.append("}")
     }
@@ -138,11 +138,10 @@ object behaviors {
     result.append(ifString)
     result.append(") ")
     result.append(blockString)
-    if(elseBlock.trim.length > 0) {
+    if (elseBlock.trim.length > 0) {
       result.append(" else ")
       result.append(elseBlock)
     }
-    result.append(EOL)
     result.toString()
   }
 

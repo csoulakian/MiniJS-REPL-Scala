@@ -23,6 +23,7 @@ object Calculator extends App {
     }
   }
 
+
   if (args.length > 0) {
     processExpr(args mkString " ")
   } else {
