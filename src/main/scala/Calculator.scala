@@ -19,7 +19,7 @@ object Calculator extends App {
         println("The parsed expression is: ")
         println(toFormattedString(expr))
         //println("It has size " + size(expr) + " and depth " + depth(expr))
-        //println("It evaluates to " + evaluate(expr))
+        println("It evaluates to " + evaluate(expr))
     }
   }
 
