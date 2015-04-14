@@ -17,15 +17,13 @@ def apply(store: Store)(s: Expr): LValue[Int] = s match {
   case Variable(name)     => store(name)
   case Equals(left, right) =>
     val rvalue = apply(store)(right)
+
     if (store contains left.str) {
       val lvalue = apply(store)(left)
       lvalue.set(rvalue.get)
     }
-    else store(left.str)
-
-
-
-
+    else {store(left.str) = rvalue}
+    rvalue
   case Block(statements @ _*) =>
     statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
   case Loop(guard, body) =>

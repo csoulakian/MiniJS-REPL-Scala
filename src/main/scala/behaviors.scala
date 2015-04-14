@@ -1,6 +1,7 @@
 package edu.luc.cs.laufer.cs473.expressions
 
 import ast._
+import scala.collection.mutable.Map
 
 
 /**
@@ -46,8 +47,12 @@ object Execute {
     case Variable(name)     => store(name)
     case Equals(left, right) =>
       val rvalue = apply(store)(right)
-      val lvalue = apply(store)(left)
-      lvalue.set(rvalue.get)
+      if (store contains left.str) {
+        val lvalue = apply(store)(left)
+        lvalue.set(rvalue.get)
+      }
+      else {store.put(left.str, rvalue)}
+      rvalue
     case Block(statements @ _*) =>
       statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
     case Loop(guard, body) =>
@@ -57,27 +62,24 @@ object Execute {
         gValue = apply(store)(guard)
       }
       Cell.NULL
+    case Conditional(_,_,_) => ???
+    case UMinus(_) => ???
+    case Mod(_,_) => ???
   }
-
-
 }
 
 object behaviors {
 
+  //type Result = Try[Value]
   type Store = Map[String, LValue[Int]]
 
   def evaluate(e: Seq[_]): Unit = {
-
-    val store: Store = Map[String, LValue[Int]]()
-
+    val store: Store = Map.empty
     println(store)
-
     if (e.nonEmpty) {
       for(exp <- e) Execute(store)(exp.asInstanceOf[Expr])
     }
-
     println(store)
-
   }
 
   def size(e: Expr): Int = e match {
