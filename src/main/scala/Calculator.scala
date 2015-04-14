@@ -1,7 +1,7 @@
 package edu.luc.cs.laufer.cs473.expressions
 
 import org.parboiled2.ParseError
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
 
 object Calculator extends App {
 
@@ -19,7 +19,7 @@ object Calculator extends App {
         println("The parsed expression is: ")
         println(toFormattedString(expr))
         //println("It has size " + size(expr) + " and depth " + depth(expr))
-        println("It evaluates to " + evaluate(expr))
+        println("It evaluates to " + Try(evaluate(expr)))
     }
   }
 

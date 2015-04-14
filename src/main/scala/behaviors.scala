@@ -2,6 +2,7 @@ package edu.luc.cs.laufer.cs473.expressions
 
 import ast._
 import scala.collection.mutable.Map
+import scala.util.Try
 
 
 /**
@@ -37,14 +38,17 @@ object Cell {
 object Execute {
 
   type Store = Map[String, LValue[Int]]
+  type Value = Cell[Int]
+  type Result = Try[Value]
 
-  def apply(store: Store)(s: Expr): LValue[Int] = s match {
-    case Constant(value)    => Cell(value)
-    case Plus(left, right)  => Cell(apply(store)(left).get + apply(store)(right).get)
+  def apply(store: Store)(s: Expr): Result = s match {
+    case Constant(value)    => Try(Cell(value))
+    case Plus(left, right)  => Cell(apply(store)(left).get + apply(store)(right).get.asInstanceOf[String])
     case Minus(left, right) => Cell(apply(store)(left).get - apply(store)(right).get)
     case Times(left, right) => Cell(apply(store)(left).get * apply(store)(right).get)
     case Div(left, right)   => Cell(apply(store)(left).get / apply(store)(right).get)
-    case Variable(name)     => store(name)
+    //variable case only if key is already found in map
+    case Variable(name)     => Try(store(name))
     case Equals(left, right) =>
       val rvalue = apply(store)(right)
       if (store contains left.str) {
@@ -52,7 +56,7 @@ object Execute {
         lvalue.set(rvalue.get)
       }
       else {store.put(left.str, rvalue)}
-      rvalue
+      Cell(0)
     case Block(statements @ _*) =>
       statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
     case Loop(guard, body) =>
@@ -69,17 +73,21 @@ object Execute {
 }
 
 object behaviors {
-
-  //type Result = Try[Value]
+  type Value = LValue[Int]
+  type Result = Try[Value]
   type Store = Map[String, LValue[Int]]
 
-  def evaluate(e: Seq[_]): Unit = {
+  def evaluate(e: Seq[Expr]): LValue[Int] = {
     val store: Store = Map.empty
     println(store)
-    if (e.nonEmpty) {
-      for(exp <- e) Execute(store)(exp.asInstanceOf[Expr])
+    val result = Cell.NULL
+    for(exp <- e) {
+      //result.set(Execute(store)(exp.asInstanceOf[Expr]).get)
+      Try(result.set(Execute(store)(exp.asInstanceOf[Expr]).get))
     }
     println(store)
+    result
+
   }
 
   def size(e: Expr): Int = e match {
