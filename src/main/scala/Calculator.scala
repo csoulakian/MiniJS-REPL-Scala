@@ -1,9 +1,15 @@
 package edu.luc.cs.laufer.cs473.expressions
 
 import org.parboiled2.ParseError
+import scala.collection.mutable.Map
 import scala.util.{Try, Failure, Success}
 
 object Calculator extends App {
+
+
+  type Store = Map[String, LValue[Int]]
+  val store: Store = Map.empty
+  println("Memory: " + store)
 
   def processExpr(input: String): Unit = {
     println("You entered: " + input)
@@ -19,9 +25,13 @@ object Calculator extends App {
         println("The parsed expression is: ")
         println(toFormattedString(expr))
         //println("It has size " + size(expr) + " and depth " + depth(expr))
-        println("It evaluates to " + Try(evaluate(expr)))
+        println("It evaluates to " + Try(evaluate(store)(expr)))
     }
+    println("Memory: " + store)
+    // map is cleared after each input
+    store.clear()
   }
+
 
 
   if (args.length > 0) {

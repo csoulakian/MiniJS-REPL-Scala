@@ -38,17 +38,15 @@ object Cell {
 object Execute {
 
   type Store = Map[String, LValue[Int]]
-  type Value = Cell[Int]
-  type Result = Try[Value]
 
-  def apply(store: Store)(s: Expr): Result = s match {
-    case Constant(value)    => Try(Cell(value))
-    case Plus(left, right)  => Cell(apply(store)(left).get + apply(store)(right).get.asInstanceOf[String])
+  def apply(store: Store)(s: Expr): LValue[Int] = s match {
+    case Constant(value)    => Cell(value)
+    case Plus(left, right)  => Cell(apply(store)(left).get + apply(store)(right).get)
     case Minus(left, right) => Cell(apply(store)(left).get - apply(store)(right).get)
     case Times(left, right) => Cell(apply(store)(left).get * apply(store)(right).get)
     case Div(left, right)   => Cell(apply(store)(left).get / apply(store)(right).get)
     //variable case only if key is already found in map
-    case Variable(name)     => Try(store(name))
+    case Variable(name)     => store(name)
     case Equals(left, right) =>
       val rvalue = apply(store)(right)
       if (store contains left.str) {
@@ -74,20 +72,15 @@ object Execute {
 
 object behaviors {
   type Value = LValue[Int]
-  type Result = Try[Value]
   type Store = Map[String, LValue[Int]]
 
-  def evaluate(e: Seq[Expr]): LValue[Int] = {
-    val store: Store = Map.empty
-    println(store)
-    val result = Cell.NULL
+  // need to change e to Seq[_] and put for statement inside if(e.nonempty)
+  def evaluate(store: Store)(e: Seq[Expr]): Value = {
+    val result: Value = Cell.NULL
     for(exp <- e) {
-      //result.set(Execute(store)(exp.asInstanceOf[Expr]).get)
-      Try(result.set(Execute(store)(exp.asInstanceOf[Expr]).get))
+      result.set(Try(Execute(store)(exp.asInstanceOf[Expr])).get.get)
     }
-    println(store)
     result
-
   }
 
   def size(e: Expr): Int = e match {
