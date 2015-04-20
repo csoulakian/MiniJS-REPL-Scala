@@ -11,7 +11,11 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Cond | Lo | Blo }
 
   /**   assignment    ::= ident "=" expression ";"  */
-  def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Variable, _: Expr))}
+  def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Expr, _: Expr))}
+
+  /**   equation     ::= expression "=" expression
+    * only place it's used is in beginning of if conditional */
+  def Equation = rule { Expression ~ ws('=') ~ Expression ~> (Equals(_: Expr, _: Expr))}
 
   /**   conditional   ::= "if" "(" expression ")" block [ "else" block ]
     *
@@ -21,9 +25,9 @@ class ExprParser(val input: ParserInput) extends Parser {
     * Ignore false errors on the or operator and ~>
     * */
   def Cond = rule {
-    "if" ~ WhiteSpace ~ ws('(') ~ Expression ~ ws(')') ~ (
-      (Blo ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Expr, _: Block, _: Block)))
-        | (Blo ~> (Conditional(_: Expr, _: Block, Block(): Block)))
+    "if" ~ WhiteSpace ~ ws('(') ~ Equation ~ ws(')') ~ (
+      (Blo ~ "else" ~ WhiteSpace ~ Blo ~> (Conditional(_: Equals, _: Block, _: Block)))
+        | (Blo ~> (Conditional(_: Equals, _: Block, Block(): Block)))
     )
   }
 

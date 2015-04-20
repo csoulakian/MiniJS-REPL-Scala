@@ -45,16 +45,18 @@ object Execute {
     case Minus(left, right) => Cell(apply(store)(left).get - apply(store)(right).get)
     case Times(left, right) => Cell(apply(store)(left).get * apply(store)(right).get)
     case Div(left, right)   => Cell(apply(store)(left).get / apply(store)(right).get)
+    case UMinus(value) => Cell(-apply(store)(value).get)
+    case Mod(left, right) => Cell(apply(store)(left).get % apply(store)(right).get)
     //variable case only if key is already found in map
     case Variable(name)     => store(name)
     case Equals(left, right) =>
-      val rvalue = apply(store)(right)
-      if (store contains left.str) {
-        val lvalue = apply(store)(left)
-        lvalue.set(rvalue.get)
+      val rValue = apply(store)(right)
+      if (store contains left.asInstanceOf[Variable].str) {
+        val lValue = apply(store)(left)
+        lValue.set(rValue.get)
       }
-      else {store.put(left.str, rvalue)}
-      Cell(0)
+      else {store.put(left.asInstanceOf[Variable].str, rValue)}
+      Cell.NULL
     case Block(statements @ _*) =>
       statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
     case Loop(guard, body) =>
@@ -64,9 +66,19 @@ object Execute {
         gValue = apply(store)(guard)
       }
       Cell.NULL
-    case Conditional(_,_,_) => ???
-    case UMinus(_) => ???
-    case Mod(_,_) => ???
+    case Conditional(Equals(left,right), block, elseBlock) =>
+      val rvalue = apply(store)(right)
+      val lvalue = apply(store)(left)
+      val result = Cell.NULL
+      if(rvalue.get == lvalue.get) {
+        result.set(apply(store)(block).get)
+      }
+      else {
+        if(elseBlock.expr.nonEmpty) {
+          result.set(apply(store)(elseBlock).get)
+        }
+      }
+      result
   }
 }
 
@@ -132,7 +144,7 @@ object behaviors {
   def toFormattedString(prefix: String)(e: Expr): String = e match {
     case Variable(v)           => prefix + v.toString
     case Constant(c)           => prefix + c.toString
-    case Equals(v, c)          => buildExprString(prefix, " = ", toFormattedString(prefix)(v), toFormattedString(prefix)(c))
+    case Equals(l, r)          => buildExprString(prefix, " = ", toFormattedString(prefix)(l), toFormattedString(prefix)(r))
     case Conditional(i, b, eb) => buildCondExprString(prefix, toFormattedString(prefix)(i),
       toFormattedString(prefix)(b), toFormattedString(prefix)(eb))
     case Loop(exp, b)          => buildLoopExprString(prefix, toFormattedString(prefix)(exp), toFormattedString(prefix)(b))
