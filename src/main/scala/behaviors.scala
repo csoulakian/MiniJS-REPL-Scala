@@ -86,43 +86,14 @@ object behaviors {
   type Value = LValue[Int]
   type Store = Map[String, LValue[Int]]
 
-  // need to change e to Seq[_] and put for statement inside if(e.nonempty)
-  def evaluate(store: Store)(e: Seq[Expr]): Value = {
+  def evaluate(store: Store)(e: Seq[_]): Value = {
     val result: Value = Cell.NULL
-    for(exp <- e) {
-      result.set(Try(Execute(store)(exp.asInstanceOf[Expr])).get.get)
+    if(e.nonEmpty) {
+      for (exp <- e) {
+        result.set(Try(Execute(store)(exp.asInstanceOf[Expr])).get.get)
+      }
     }
     result
-  }
-
-  def size(e: Expr): Int = e match {
-    case Variable(v)           => 1
-    case Constant(c)           => 1
-    case UMinus(r)             => 1 + size(r)
-    case Plus(l, r)            => 1 + size(l) + size(r)
-    case Minus(l, r)           => 1 + size(l) + size(r)
-    case Times(l, r)           => 1 + size(l) + size(r)
-    case Div(l, r)             => 1 + size(l) + size(r)
-    case Mod(l, r)             => 1 + size(l) + size(r)
-    case Equals(v, c)          => ???
-    case Conditional(r, b, eb) => ???
-    case Loop(r, b)            => ???
-    case Block(r)              => ???
-  }
-
-  def depth(e: Expr): Int = e match {
-    case Variable(v)           => 1
-    case Constant(c)           => 1
-    case UMinus(r)             => 1 + depth(r)
-    case Plus(l, r)            => 1 + math.max(depth(l), depth(r))
-    case Minus(l, r)           => 1 + math.max(depth(l), depth(r))
-    case Times(l, r)           => 1 + math.max(depth(l), depth(r))
-    case Div(l, r)             => 1 + math.max(depth(l), depth(r))
-    case Mod(l, r)             => 1 + math.max(depth(l), depth(r))
-    case Equals(v, c)          => ???
-    case Conditional(r, b, eb) => ???
-    case Loop(r, b)            => ???
-    case Block(r)              => ???
   }
 
   // output of parser is always a Seq[Expr],
@@ -211,7 +182,7 @@ object behaviors {
   def buildCondExprString(prefix: String, ifString: String, blockString: String, elseBlock: String) = {
     val result = new StringBuilder(prefix)
     result.append("if (")
-    result.append(ifString)
+    result.append(ifString.dropRight(1))
     result.append(") ")
     result.append(blockString)
     if (elseBlock.trim.length > 0) {
