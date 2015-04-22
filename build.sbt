@@ -10,3 +10,5 @@ libraryDependencies ++= Seq(
   "org.parboiled" %% "parboiled" % "2.0.1",
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
+
+ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := """.*\.Calculator"""

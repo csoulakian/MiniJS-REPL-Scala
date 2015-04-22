@@ -85,9 +85,10 @@ object Execute {
 object behaviors {
   type Value = LValue[Int]
   type Store = Map[String, LValue[Int]]
+  val result: Value = Cell.NULL
 
   def evaluate(store: Store)(e: Seq[_]): Value = {
-    val result: Value = Cell.NULL
+    result.set(0)
     if(e.nonEmpty) {
       for (exp <- e) {
         result.set(Try(Execute(store)(exp.asInstanceOf[Expr])).get.get)

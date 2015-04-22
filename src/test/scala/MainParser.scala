@@ -9,7 +9,7 @@ import behaviors._
 import scala.util.{Failure, Success}
 
 object MainParser extends App {
-  val parsedExpr = new ExprParser(complex1string).InputLine.run()
+  val parsedExpr = new ExprParser(complexString1).InputLine.run()
   println(parsedExpr.get)
   println(complex1)
   println(parsedExpr.get == complex1)
