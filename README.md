@@ -1,10 +1,16 @@
 **Note:** If statements in our program do not work exactly like they do in the JavaScript console.
 The initial if statement contains an equals expr that returns a boolean indicating whether or not the left
-and right sides of the equals expr are in fact equal.
+and right sides of the equals expr are in fact equal. Ex:
+
+    if(1+1=2){3;} else {4;}
+returns 3, and
+
+    if(1+1=9){3;} else {4;}
+returns 4.
+
 
 Starting Point: A simple expression evaluator in Scala using
 [parboiled2](https://github.com/sirthias/parboiled2) for parsing.
-
 
 # Project 3a #
 
