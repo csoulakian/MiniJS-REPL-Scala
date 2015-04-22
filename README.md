@@ -1,4 +1,4 @@
-<u><b>Note:</b></u> If statements in our program do not work exactly like they do in the JavaScript console.
+**Note:** If statements in our program do not work exactly like they do in the JavaScript console.
 The initial if statement contains an equals expr that returns a boolean indicating whether or not the left
 and right sides of the equals expr are in fact equal.
 
