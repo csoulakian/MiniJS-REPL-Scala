@@ -5,10 +5,15 @@ import ast._
 
 class ExprParser(val input: ParserInput) extends Parser {
 
-  def InputLine = rule { WhiteSpace ~ zeroOrMore(Statement) ~ EOI }
+  def InputLine = rule { WhiteSpace ~ zeroOrMore(Statement) | Struct ~ EOI }
 
   /**   statement   ::= expression ";" | assignment | conditional | loop | block  */
   def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Cond | Lo | Blo }
+
+  /** struct ::= "{" "}" | "{" field { "," field }* "}"     */
+  def Struct = rule { ws('{') ~ ws('}') | ws('{') ~ field ~ zeroOrMore(ws(',') ~ field) ~ ws('}') ~>
+    ((allFields: Seq[(Variable,Expr)]) => Structure(allFields.toMap)) }
+
 
   /**   assignment    ::= ident "=" expression ";"  */
   def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Expr, _: Expr))}
@@ -59,6 +64,8 @@ class ExprParser(val input: ParserInput) extends Parser {
   def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
 
   // explicitly handle trailing whitespace
+
+  def field = rule{ ident ~ ws(':') ~ Expression ~> ((_,_)) }
 
   def ident = rule { capture(Alphabet) ~ WhiteSpace ~> ((s: String) => Variable(s.trim)) }
 

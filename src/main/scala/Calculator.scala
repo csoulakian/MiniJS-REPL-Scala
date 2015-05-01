@@ -23,9 +23,8 @@ object Calculator extends App {
       case Success(expr) =>
         import behaviors._
         println("The parsed expression is: ")
-        println(toFormattedString(expr))
-        //println("It has size " + size(expr) + " and depth " + depth(expr))
-        println("It evaluates to " + Try(evaluate(store)(expr)))
+        //println(toFormattedString(expr))
+        //println("It evaluates to " + Try(evaluate(store)(expr)))
     }
     println("Memory: " + store)
     // map is cleared after each input
