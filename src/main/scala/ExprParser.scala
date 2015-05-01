@@ -5,18 +5,15 @@ import ast._
 
 class ExprParser(val input: ParserInput) extends Parser {
 
-  def InputLine = rule { WhiteSpace ~ zeroOrMore(Statement) | Struct ~ EOI }
+  def InputLine = rule { WhiteSpace ~ zeroOrMore(Statement) ~ EOI }
 
   /**   statement   ::= expression ";" | assignment | conditional | loop | block  */
   def Statement: Rule1[Expr] = rule { Expression ~ ws(';') | Assignment | Cond | Lo | Blo }
 
-  /** struct ::= "{" "}" | "{" field { "," field }* "}"     */
-  def Struct = rule { ws('{') ~ ws('}') | ws('{') ~ field ~ zeroOrMore(ws(',') ~ field) ~ ws('}') ~>
-    ((allFields: Seq[(Variable,Expr)]) => Structure(allFields.toMap)) }
 
-
-  /**   assignment    ::= ident "=" expression ";"  */
-  def Assignment = rule { ident ~ ws('=') ~ Expression ~ ws(';') ~> (Equals(_: Expr, _: Expr))}
+  /**   assignment    ::= ident { "." ident }* "=" expression ";"  */
+  def Assignment = rule { ident ~ zeroOrMore(ws('.') ~ ident) ~ ws('=') ~ Expression ~ ws(';') ~>
+    (Equals(_: Expr, _: Expr))}
 
   /**   equation     ::= expression "=" expression
     * only place it's used is in beginning of if conditional */
@@ -60,12 +57,22 @@ class ExprParser(val input: ParserInput) extends Parser {
     )
   }
 
-  /**   factor    ::= ident | number | "+" factor | "-" factor | "(" expression ")" */
-  def Factor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens }
+  /** factor       ::= simplefactor { "." ident }*    */
+  def Factor: Rule1[Expr] = rule { SimpleFactor ~ zeroOrMore(ws('.') ~ ident) }
+
+  /**   simplefactor    ::= ident | number | "+" factor | "-" factor | "(" expression ")" | struct */
+  def SimpleFactor: Rule1[Expr] = rule { ident | Number | UnaryPlus | UnaryMinus | Parens | Struct }
+
+  /** struct ::= "{" "}" | "{" field { "," field }* "}"     */
+  def Struct = rule { ws('{') ~ ws('}') | ws('{') ~ field ~ zeroOrMore(ws(',') ~ field) ~ ws('}') ~>
+    ((allFields: Seq[(Variable,Expr)]) => Structure(allFields.toMap)) }
+
 
   // explicitly handle trailing whitespace
 
-  def field = rule{ ident ~ ws(':') ~ Expression ~> ((_,_)) }
+  def select = rule { Expression ~ oneOrMore(ws('.') ~ field) }
+
+  def field = rule { ident ~ ws(':') ~ Expression ~> ((_,_)) }
 
   def ident = rule { capture(Alphabet) ~ WhiteSpace ~> ((s: String) => Variable(s.trim)) }
 
