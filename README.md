@@ -1,18 +1,10 @@
-**Note:** If statements in our program do not work exactly like they do in the JavaScript console.
-The initial if statement contains an equals expr that returns a boolean indicating whether or not the left
-and right sides of the equals expr are in fact equal. Ex:
+**Loyola University Chicago**
 
-    if(1+1=2){3;} else {4;}
-returns 3, and
+**COMP 372 - Programming Languages**
 
-    if(1+1=9){3;} else {4;}
-returns 4.
+**Spring 2015 - Project 3 MiniJS REPL in Scala**
 
-
-Starting Point: A simple expression evaluator in Scala using
-[parboiled2](https://github.com/sirthias/parboiled2) for parsing.
-
-# Project 3a #
+### Project 3a
 
 In this project, you will write a front end (lexical and syntax analysis combined as a PEG)
 for a Scala-based interpreter/REPL for the simple imperative language MiniC
@@ -24,7 +16,7 @@ Your recommended starting point is the [expressions-scala](https://github.com/Lo
 - Extend the parser to support the imperative constructs
 - Extend the unparser (pretty-printer) to support the imperative constructs
 
-# Project 3b #
+### Project 3b
 
 In this project, you will continue your work from project 3a by implementing the dynamic language semantics
 of MiniJS as part of the evaluator/interpreter.
@@ -36,7 +28,7 @@ example for additional guidance.
 of the new imperative constructs (statements)
 - Create mutable store to map named variables to storage cells where values can be stored
 
-# Project 3c #
+### Project 3c
 
 In this project, you will add proper data structures (product or aggregation types)
 to the MiniJS language by adding constructs for:
@@ -53,3 +45,18 @@ example for a simpler version of this language (without field addition).
 - Changes to the grammar
 - Additions to the AST and unparser
 - Support in the interpreter
+
+
+**Note:** If statements in our program do not work exactly like they do in the JavaScript console.
+The initial if statement contains an equals expr that returns a boolean indicating whether or not the left
+and right sides of the equals expr are in fact equal. Ex:
+
+    if(1+1=2){3;} else {4;}
+returns 3, and
+
+    if(1+1=9){3;} else {4;}
+returns 4.
+
+
+Starting Point: A simple expression evaluator in Scala using
+[parboiled2](https://github.com/sirthias/parboiled2) for parsing.
